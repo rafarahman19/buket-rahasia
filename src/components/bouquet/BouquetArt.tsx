@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   type BouquetElementType,
+  getElementMeta,
   getPaperMeta,
   getRibbonMeta,
   type PaperType,
@@ -8,12 +9,12 @@ import {
 } from "@/lib/bouquet-catalog";
 
 /**
- * Original hand-crafted pastel SVG botanical illustrations designed exclusively
- * for Buket Rahasia. Each element is centered at (0, 0) for its bloom/foliage
- * focal area with a soft stem extending downward so elements nest naturally inside
- * the bouquet wrapping paper.
+ * Renders the stem (for flowers) or full leafy sprig (for greenery).
+ * Separating stems/greenery from flower heads enforces proper botanical layering:
+ * wrapper back -> stems/greenery -> flower heads -> wrapper front -> ribbon,
+ * and allows stems to grow upward (`scaleY: 0 -> 1`) before flower heads bloom on top.
  */
-export function BouquetElementGraphic({
+export function BouquetStemGraphic({
   type,
 }: {
   type: BouquetElementType;
@@ -22,7 +23,6 @@ export function BouquetElementGraphic({
     case "rose":
       return (
         <g>
-          {/* Soft stem & small leaves */}
           <path
             d="M 0 28 Q -4 68 2 115"
             fill="none"
@@ -41,61 +41,6 @@ export function BouquetElementGraphic({
             fill="#A6CCA9"
             stroke="#5D8464"
             strokeWidth="1.6"
-          />
-          {/* Outer blush petals */}
-          <ellipse
-            cx="-16"
-            cy="-2"
-            rx="22"
-            ry="24"
-            transform="rotate(-18 -16 -2)"
-            fill="#F9C5D3"
-            stroke="#C96F89"
-            strokeWidth="1.8"
-          />
-          <ellipse
-            cx="16"
-            cy="-2"
-            rx="22"
-            ry="24"
-            transform="rotate(18 16 -2)"
-            fill="#F9C5D3"
-            stroke="#C96F89"
-            strokeWidth="1.8"
-          />
-          <ellipse
-            cx="0"
-            cy="-14"
-            rx="24"
-            ry="20"
-            fill="#FAD2DD"
-            stroke="#C96F89"
-            strokeWidth="1.8"
-          />
-          <ellipse
-            cx="0"
-            cy="10"
-            rx="26"
-            ry="20"
-            fill="#F6B2C5"
-            stroke="#C96F89"
-            strokeWidth="1.8"
-          />
-          {/* Inner spiral petals */}
-          <circle
-            cx="0"
-            cy="-2"
-            r="17"
-            fill="#F39BB4"
-            stroke="#BA5C78"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M -10 -4 C -8 -14, 10 -14, 11 -3 C 12 7, -6 9, -8 0 C -9 -6, 4 -8, 5 -2 C 5 2, -2 3, -2 0"
-            fill="none"
-            stroke="#FFF2F6"
-            strokeWidth="2.4"
-            strokeLinecap="round"
           />
         </g>
       );
@@ -116,39 +61,10 @@ export function BouquetElementGraphic({
             stroke="#5B8360"
             strokeWidth="1.6"
           />
-          {/* Back center petal */}
-          <path
-            d="M 0 -36 C 16 -26, 18 8, 0 24 C -18 8, -16 -26, 0 -36 Z"
-            fill="#F49580"
-            stroke="#C46652"
-            strokeWidth="1.8"
-          />
-          {/* Left cupped petal */}
-          <path
-            d="M -2 26 C -26 22, -30 -12, -16 -32 C -4 -22, 0 -2, -2 26 Z"
-            fill="#F8B09F"
-            stroke="#C46652"
-            strokeWidth="1.8"
-          />
-          {/* Right cupped petal */}
-          <path
-            d="M 2 26 C 26 22, 30 -12, 16 -32 C 4 -22, 0 -2, 2 26 Z"
-            fill="#FAC2B4"
-            stroke="#C46652"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M -8 -18 Q -12 -2 -6 14"
-            fill="none"
-            stroke="#FFE9E3"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
         </g>
       );
 
-    case "sunflower": {
-      const rayAngles = Array.from({ length: 16 }, (_, i) => i * 22.5);
+    case "sunflower":
       return (
         <g>
           <path
@@ -164,191 +80,43 @@ export function BouquetElementGraphic({
             stroke="#557D5A"
             strokeWidth="1.6"
           />
-          {rayAngles.map((deg) => (
-            <ellipse
-              key={deg}
-              cx="0"
-              cy="-27"
-              rx="7.5"
-              ry="16"
-              transform={`rotate(${deg})`}
-              fill={deg % 45 === 0 ? "#FBD977" : "#F6C854"}
-              stroke="#C9962C"
-              strokeWidth="1.4"
-            />
-          ))}
-          <circle cx="0" cy="0" r="17" fill="#7D563C" stroke="#593B27" strokeWidth="2" />
-          <circle cx="-5" cy="-5" r="1.8" fill="#B58867" />
-          <circle cx="4" cy="-6" r="1.8" fill="#B58867" />
-          <circle cx="0" cy="2" r="1.8" fill="#B58867" />
-          <circle cx="-7" cy="4" r="1.8" fill="#B58867" />
-          <circle cx="7" cy="3" r="1.8" fill="#B58867" />
-          <circle cx="-2" cy="8" r="1.8" fill="#B58867" />
         </g>
       );
-    }
 
-    case "daisy": {
-      const petalAngles = Array.from({ length: 12 }, (_, i) => i * 30);
+    case "daisy":
       return (
-        <g>
-          <path
-            d="M 0 24 Q 4 68 0 112"
-            fill="none"
-            stroke="#739E79"
-            strokeWidth="3.8"
-            strokeLinecap="round"
-          />
-          {petalAngles.map((deg) => (
-            <ellipse
-              key={deg}
-              cx="0"
-              cy="-21"
-              rx="6.8"
-              ry="15"
-              transform={`rotate(${deg})`}
-              fill="#FFFDF9"
-              stroke="#D8CFC4"
-              strokeWidth="1.4"
-            />
-          ))}
-          <circle
-            cx="0"
-            cy="0"
-            r="11.5"
-            fill="#F9D56E"
-            stroke="#CF9F34"
-            strokeWidth="1.8"
-          />
-          <circle cx="-3" cy="-3" r="1.5" fill="#FFF3C4" />
-        </g>
+        <path
+          d="M 0 24 Q 4 68 0 112"
+          fill="none"
+          stroke="#739E79"
+          strokeWidth="3.8"
+          strokeLinecap="round"
+        />
       );
-    }
 
-    case "lily": {
-      const tepalAngles = [0, 60, 120, 180, 240, 300];
+    case "lily":
       return (
-        <g>
-          <path
-            d="M 0 28 Q -4 74 2 118"
-            fill="none"
-            stroke="#68956E"
-            strokeWidth="4.2"
-            strokeLinecap="round"
-          />
-          {tepalAngles.map((deg, idx) => (
-            <g key={deg} transform={`rotate(${deg})`}>
-              <path
-                d="M 0 0 C -11 -12, -10 -34, 0 -42 C 10 -34, 11 -12, 0 0 Z"
-                fill={idx % 2 === 0 ? "#FAD4E2" : "#F6BDD2"}
-                stroke="#C96D8F"
-                strokeWidth="1.6"
-              />
-              <line
-                x1="0"
-                y1="-4"
-                x2="0"
-                y2="-28"
-                stroke="#E589AB"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <circle cx="-3" cy="-16" r="1.2" fill="#BA547A" />
-              <circle cx="3" cy="-20" r="1.2" fill="#BA547A" />
-            </g>
-          ))}
-          {/* Delicate stamens */}
-          <line x1="0" y1="0" x2="-8" y2="-11" stroke="#88A87D" strokeWidth="1.5" />
-          <line x1="0" y1="0" x2="8" y2="-11" stroke="#88A87D" strokeWidth="1.5" />
-          <line x1="0" y1="0" x2="0" y2="-13" stroke="#88A87D" strokeWidth="1.5" />
-          <ellipse cx="-8" cy="-12" rx="2.6" ry="1.6" fill="#D57A4A" />
-          <ellipse cx="8" cy="-12" rx="2.6" ry="1.6" fill="#D57A4A" />
-          <ellipse cx="0" cy="-14" rx="2.6" ry="1.6" fill="#D57A4A" />
-        </g>
+        <path
+          d="M 0 28 Q -4 74 2 118"
+          fill="none"
+          stroke="#68956E"
+          strokeWidth="4.2"
+          strokeLinecap="round"
+        />
       );
-    }
 
     case "peony":
       return (
-        <g>
-          <path
-            d="M 0 30 Q 2 74 -3 116"
-            fill="none"
-            stroke="#6C9872"
-            strokeWidth="4.4"
-            strokeLinecap="round"
-          />
-          {/* Lush ruffled outer petals */}
-          <circle
-            cx="-17"
-            cy="2"
-            r="19"
-            fill="#FAD4E0"
-            stroke="#CE7A95"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx="17"
-            cy="2"
-            r="19"
-            fill="#FAD4E0"
-            stroke="#CE7A95"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx="0"
-            cy="-15"
-            r="20"
-            fill="#FCE0E9"
-            stroke="#CE7A95"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx="-11"
-            cy="-10"
-            r="16"
-            fill="#F7BDD0"
-            stroke="#CE7A95"
-            strokeWidth="1.5"
-          />
-          <circle
-            cx="11"
-            cy="-10"
-            r="16"
-            fill="#F7BDD0"
-            stroke="#CE7A95"
-            strokeWidth="1.5"
-          />
-          <circle
-            cx="0"
-            cy="9"
-            r="19"
-            fill="#F5ABC2"
-            stroke="#CE7A95"
-            strokeWidth="1.6"
-          />
-          {/* Ruffled inner cluster */}
-          <circle
-            cx="0"
-            cy="-1"
-            r="14"
-            fill="#FDE8EF"
-            stroke="#CE7A95"
-            strokeWidth="1.5"
-          />
-          <circle cx="0" cy="-1" r="6.5" fill="#F8D97E" />
-          <path
-            d="M -9 2 Q 0 -7 9 2"
-            fill="none"
-            stroke="#F49CB8"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </g>
+        <path
+          d="M 0 30 Q 2 74 -3 116"
+          fill="none"
+          stroke="#6C9872"
+          strokeWidth="4.4"
+          strokeLinecap="round"
+        />
       );
 
-    case "lavender": {
-      const tiers = [-42, -31, -20, -9, 2, 13];
+    case "lavender":
       return (
         <g>
           <path
@@ -370,54 +138,20 @@ export function BouquetElementGraphic({
             stroke="#618566"
             strokeWidth="1.3"
           />
-          {tiers.map((y, idx) => (
-            <g key={y}>
-              <ellipse
-                cx="-7"
-                cy={y}
-                rx="6.2"
-                ry="4.2"
-                transform={`rotate(-28 -7 ${y})`}
-                fill={idx % 2 === 0 ? "#C3AEE8" : "#B095DF"}
-                stroke="#8568BA"
-                strokeWidth="1.3"
-              />
-              <ellipse
-                cx="7"
-                cy={y + 2}
-                rx="6.2"
-                ry="4.2"
-                transform={`rotate(28 7 ${y + 2})`}
-                fill={idx % 2 === 0 ? "#B095DF" : "#D2C2F0"}
-                stroke="#8568BA"
-                strokeWidth="1.3"
-              />
-              <ellipse
-                cx="0"
-                cy={y - 3}
-                rx="4.8"
-                ry="5.8"
-                fill="#D6C7F2"
-                stroke="#8568BA"
-                strokeWidth="1.3"
-              />
-            </g>
-          ))}
         </g>
       );
-    }
 
     case "babys_breath": {
-      const buds = [
-        { x: -24, y: -18, r: 6.5 },
-        { x: -12, y: -32, r: 6 },
-        { x: 4, y: -36, r: 6.8 },
-        { x: 20, y: -26, r: 6.2 },
-        { x: 26, y: -10, r: 5.8 },
-        { x: -18, y: 0, r: 5.8 },
-        { x: 0, y: -16, r: 6.5 },
-        { x: 14, y: -6, r: 6 },
-        { x: -4, y: 4, r: 5.5 },
+      const twigEnds = [
+        { x: -24, y: -18 },
+        { x: -12, y: -32 },
+        { x: 4, y: -36 },
+        { x: 20, y: -26 },
+        { x: 26, y: -10 },
+        { x: -18, y: 0 },
+        { x: 0, y: -16 },
+        { x: 14, y: -6 },
+        { x: -4, y: 4 },
       ];
       return (
         <g>
@@ -428,7 +162,7 @@ export function BouquetElementGraphic({
             strokeWidth="3"
             strokeLinecap="round"
           />
-          {buds.map((b, i) => (
+          {twigEnds.map((b, i) => (
             <line
               key={`twig-${i}`}
               x1="0"
@@ -440,158 +174,33 @@ export function BouquetElementGraphic({
               strokeLinecap="round"
             />
           ))}
-          {buds.map((b, i) => (
-            <g key={`bud-${i}`} transform={`translate(${b.x}, ${b.y})`}>
-              <circle
-                cx="-2.5"
-                cy="-2"
-                r={b.r * 0.62}
-                fill="#FFFFFF"
-                stroke="#D8D2C9"
-                strokeWidth="1.1"
-              />
-              <circle
-                cx="2.5"
-                cy="-2"
-                r={b.r * 0.62}
-                fill="#FFFFFF"
-                stroke="#D8D2C9"
-                strokeWidth="1.1"
-              />
-              <circle
-                cx="0"
-                cy="2.2"
-                r={b.r * 0.62}
-                fill="#FFFDF8"
-                stroke="#D8D2C9"
-                strokeWidth="1.1"
-              />
-              <circle cx="0" cy="-0.5" r="1.8" fill="#F6DF8E" />
-            </g>
-          ))}
         </g>
       );
     }
 
-    case "hydrangea": {
-      const florets = [
-        { x: -16, y: -14, fill: "#C5D8F6" },
-        { x: 4, y: -18, fill: "#D4E3FA" },
-        { x: 18, y: -6, fill: "#B8CEF2" },
-        { x: -18, y: 6, fill: "#D4E3FA" },
-        { x: 2, y: 12, fill: "#C5D8F6" },
-        { x: 0, y: -2, fill: "#E1ECFC" },
-      ];
+    case "hydrangea":
       return (
-        <g>
-          <path
-            d="M 0 28 Q -2 72 2 116"
-            fill="none"
-            stroke="#6C9772"
-            strokeWidth="4.4"
-            strokeLinecap="round"
-          />
-          {florets.map((f, idx) => (
-            <g key={idx} transform={`translate(${f.x}, ${f.y})`}>
-              <circle
-                cx="-7"
-                cy="0"
-                r="7.5"
-                fill={f.fill}
-                stroke="#7E9FD4"
-                strokeWidth="1.3"
-              />
-              <circle
-                cx="7"
-                cy="0"
-                r="7.5"
-                fill={f.fill}
-                stroke="#7E9FD4"
-                strokeWidth="1.3"
-              />
-              <circle
-                cx="0"
-                cy="-7"
-                r="7.5"
-                fill={f.fill}
-                stroke="#7E9FD4"
-                strokeWidth="1.3"
-              />
-              <circle
-                cx="0"
-                cy="7"
-                r="7.5"
-                fill={f.fill}
-                stroke="#7E9FD4"
-                strokeWidth="1.3"
-              />
-              <circle cx="0" cy="0" r="2.4" fill="#FFF6C9" />
-            </g>
-          ))}
-        </g>
+        <path
+          d="M 0 28 Q -2 72 2 116"
+          fill="none"
+          stroke="#6C9772"
+          strokeWidth="4.4"
+          strokeLinecap="round"
+        />
       );
-    }
 
     case "ranunculus":
       return (
-        <g>
-          <path
-            d="M 0 26 Q 3 70 -1 114"
-            fill="none"
-            stroke="#719B76"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            r="26"
-            fill="#FCD8C2"
-            stroke="#D18862"
-            strokeWidth="1.7"
-          />
-          <circle
-            cx="-2"
-            cy="-1"
-            r="21"
-            fill="#FAC5A6"
-            stroke="#D18862"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx="2"
-            cy="1"
-            r="16"
-            fill="#F8B38E"
-            stroke="#C77952"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            r="11"
-            fill="#FAD0B6"
-            stroke="#C77952"
-            strokeWidth="1.5"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            r="5.5"
-            fill="#DCE8B8"
-            stroke="#8FA868"
-            strokeWidth="1.4"
-          />
-        </g>
+        <path
+          d="M 0 26 Q 3 70 -1 114"
+          fill="none"
+          stroke="#719B76"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
       );
 
-    case "chamomile": {
-      const heads = [
-        { x: -16, y: -16, s: 0.85 },
-        { x: 15, y: -20, s: 0.9 },
-        { x: 2, y: 4, s: 1.0 },
-      ];
-      const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+    case "chamomile":
       return (
         <g>
           <path
@@ -603,105 +212,18 @@ export function BouquetElementGraphic({
           />
           <line x1="0" y1="24" x2="-16" y2="-16" stroke="#79A37F" strokeWidth="2.4" />
           <line x1="0" y1="24" x2="15" y2="-20" stroke="#79A37F" strokeWidth="2.4" />
-          {heads.map((h, idx) => (
-            <g key={idx} transform={`translate(${h.x}, ${h.y}) scale(${h.s})`}>
-              {angles.map((deg) => (
-                <ellipse
-                  key={deg}
-                  cx="0"
-                  cy="-12"
-                  rx="4.4"
-                  ry="8.5"
-                  transform={`rotate(${deg})`}
-                  fill="#FFFDF8"
-                  stroke="#D8CFC4"
-                  strokeWidth="1.2"
-                />
-              ))}
-              <circle
-                cx="0"
-                cy="0"
-                r="7.5"
-                fill="#F7D35C"
-                stroke="#C99D2B"
-                strokeWidth="1.4"
-              />
-            </g>
-          ))}
         </g>
       );
-    }
 
     case "orchid":
       return (
-        <g>
-          <path
-            d="M 0 24 Q -5 70 2 116"
-            fill="none"
-            stroke="#6C9672"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-          {/* Top & lower sepals */}
-          <ellipse
-            cx="0"
-            cy="-20"
-            rx="13"
-            ry="18"
-            fill="#ECD4F4"
-            stroke="#A876BA"
-            strokeWidth="1.6"
-          />
-          <ellipse
-            cx="-13"
-            cy="12"
-            rx="10"
-            ry="16"
-            transform="rotate(28 -13 12)"
-            fill="#E5C6F0"
-            stroke="#A876BA"
-            strokeWidth="1.6"
-          />
-          <ellipse
-            cx="13"
-            cy="12"
-            rx="10"
-            ry="16"
-            transform="rotate(-28 13 12)"
-            fill="#E5C6F0"
-            stroke="#A876BA"
-            strokeWidth="1.6"
-          />
-          {/* Wide butterfly lateral petals */}
-          <ellipse
-            cx="-20"
-            cy="-4"
-            rx="18"
-            ry="15"
-            transform="rotate(-12 -20 -4)"
-            fill="#F4E3FA"
-            stroke="#A876BA"
-            strokeWidth="1.7"
-          />
-          <ellipse
-            cx="20"
-            cy="-4"
-            rx="18"
-            ry="15"
-            transform="rotate(12 20 -4)"
-            fill="#F4E3FA"
-            stroke="#A876BA"
-            strokeWidth="1.7"
-          />
-          {/* Labellum (center lip) */}
-          <path
-            d="M 0 -4 C -11 -2, -12 14, 0 18 C 12 14, 11 -2, 0 -4 Z"
-            fill="#D474A8"
-            stroke="#9B4675"
-            strokeWidth="1.6"
-          />
-          <circle cx="0" cy="2" r="4.2" fill="#FBE38E" />
-        </g>
+        <path
+          d="M 0 24 Q -5 70 2 116"
+          fill="none"
+          stroke="#6C9672"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
       );
 
     // -------------------------------------------------------------------------
@@ -996,6 +518,659 @@ export function BouquetElementGraphic({
   }
 }
 
+export interface BouquetFlowerHeadGraphicProps {
+  type: BouquetElementType;
+  petalsClassName?: string;
+  petalsStyle?: React.CSSProperties;
+  centerClassName?: string;
+  centerStyle?: React.CSSProperties;
+}
+
+/**
+ * Renders the flower head with distinct outer-petal and inner-center sub-layers
+ * so petals can rotate/unfurl open while the center pops during the reveal bloom.
+ * Returns `null` for greenery items (whose full foliage lives in `BouquetStemGraphic`).
+ */
+export function BouquetFlowerHeadGraphic({
+  type,
+  petalsClassName,
+  petalsStyle,
+  centerClassName,
+  centerStyle,
+}: BouquetFlowerHeadGraphicProps): React.ReactElement | null {
+  if (getElementMeta(type).category === "greenery") {
+    return null;
+  }
+
+  switch (type) {
+    case "rose":
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            <ellipse
+              cx="-16"
+              cy="-2"
+              rx="22"
+              ry="24"
+              transform="rotate(-18 -16 -2)"
+              fill="#F9C5D3"
+              stroke="#C96F89"
+              strokeWidth="1.8"
+            />
+            <ellipse
+              cx="16"
+              cy="-2"
+              rx="22"
+              ry="24"
+              transform="rotate(18 16 -2)"
+              fill="#F9C5D3"
+              stroke="#C96F89"
+              strokeWidth="1.8"
+            />
+            <ellipse
+              cx="0"
+              cy="-14"
+              rx="24"
+              ry="20"
+              fill="#FAD2DD"
+              stroke="#C96F89"
+              strokeWidth="1.8"
+            />
+            <ellipse
+              cx="0"
+              cy="10"
+              rx="26"
+              ry="20"
+              fill="#F6B2C5"
+              stroke="#C96F89"
+              strokeWidth="1.8"
+            />
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <circle
+              cx="0"
+              cy="-2"
+              r="17"
+              fill="#F39BB4"
+              stroke="#BA5C78"
+              strokeWidth="1.8"
+            />
+            <path
+              d="M -10 -4 C -8 -14, 10 -14, 11 -3 C 12 7, -6 9, -8 0 C -9 -6, 4 -8, 5 -2 C 5 2, -2 3, -2 0"
+              fill="none"
+              stroke="#FFF2F6"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            />
+          </g>
+        </g>
+      );
+
+    case "tulip":
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            <path
+              d="M 0 -36 C 16 -26, 18 8, 0 24 C -18 8, -16 -26, 0 -36 Z"
+              fill="#F49580"
+              stroke="#C46652"
+              strokeWidth="1.8"
+            />
+            <path
+              d="M -2 26 C -26 22, -30 -12, -16 -32 C -4 -22, 0 -2, -2 26 Z"
+              fill="#F8B09F"
+              stroke="#C46652"
+              strokeWidth="1.8"
+            />
+            <path
+              d="M 2 26 C 26 22, 30 -12, 16 -32 C 4 -22, 0 -2, 2 26 Z"
+              fill="#FAC2B4"
+              stroke="#C46652"
+              strokeWidth="1.8"
+            />
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <path
+              d="M -8 -18 Q -12 -2 -6 14"
+              fill="none"
+              stroke="#FFE9E3"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </g>
+        </g>
+      );
+
+    case "sunflower": {
+      const rayAngles = Array.from({ length: 16 }, (_, i) => i * 22.5);
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {rayAngles.map((deg) => (
+              <ellipse
+                key={deg}
+                cx="0"
+                cy="-27"
+                rx="7.5"
+                ry="16"
+                transform={`rotate(${deg})`}
+                fill={deg % 45 === 0 ? "#FBD977" : "#F6C854"}
+                stroke="#C9962C"
+                strokeWidth="1.4"
+              />
+            ))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <circle
+              cx="0"
+              cy="0"
+              r="17"
+              fill="#7D563C"
+              stroke="#593B27"
+              strokeWidth="2"
+            />
+            <circle cx="-5" cy="-5" r="1.8" fill="#B58867" />
+            <circle cx="4" cy="-6" r="1.8" fill="#B58867" />
+            <circle cx="0" cy="2" r="1.8" fill="#B58867" />
+            <circle cx="-7" cy="4" r="1.8" fill="#B58867" />
+            <circle cx="7" cy="3" r="1.8" fill="#B58867" />
+            <circle cx="-2" cy="8" r="1.8" fill="#B58867" />
+          </g>
+        </g>
+      );
+    }
+
+    case "daisy": {
+      const petalAngles = Array.from({ length: 12 }, (_, i) => i * 30);
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {petalAngles.map((deg) => (
+              <ellipse
+                key={deg}
+                cx="0"
+                cy="-21"
+                rx="6.8"
+                ry="15"
+                transform={`rotate(${deg})`}
+                fill="#FFFDF9"
+                stroke="#D8CFC4"
+                strokeWidth="1.4"
+              />
+            ))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <circle
+              cx="0"
+              cy="0"
+              r="11.5"
+              fill="#F9D56E"
+              stroke="#CF9F34"
+              strokeWidth="1.8"
+            />
+            <circle cx="-3" cy="-3" r="1.5" fill="#FFF3C4" />
+          </g>
+        </g>
+      );
+    }
+
+    case "lily": {
+      const tepalAngles = [0, 60, 120, 180, 240, 300];
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {tepalAngles.map((deg, idx) => (
+              <g key={deg} transform={`rotate(${deg})`}>
+                <path
+                  d="M 0 0 C -11 -12, -10 -34, 0 -42 C 10 -34, 11 -12, 0 0 Z"
+                  fill={idx % 2 === 0 ? "#FAD4E2" : "#F6BDD2"}
+                  stroke="#C96D8F"
+                  strokeWidth="1.6"
+                />
+                <line
+                  x1="0"
+                  y1="-4"
+                  x2="0"
+                  y2="-28"
+                  stroke="#E589AB"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="-3" cy="-16" r="1.2" fill="#BA547A" />
+                <circle cx="3" cy="-20" r="1.2" fill="#BA547A" />
+              </g>
+            ))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <line x1="0" y1="0" x2="-8" y2="-11" stroke="#88A87D" strokeWidth="1.5" />
+            <line x1="0" y1="0" x2="8" y2="-11" stroke="#88A87D" strokeWidth="1.5" />
+            <line x1="0" y1="0" x2="0" y2="-13" stroke="#88A87D" strokeWidth="1.5" />
+            <ellipse cx="-8" cy="-12" rx="2.6" ry="1.6" fill="#D57A4A" />
+            <ellipse cx="8" cy="-12" rx="2.6" ry="1.6" fill="#D57A4A" />
+            <ellipse cx="0" cy="-14" rx="2.6" ry="1.6" fill="#D57A4A" />
+          </g>
+        </g>
+      );
+    }
+
+    case "peony":
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            <circle
+              cx="-17"
+              cy="2"
+              r="19"
+              fill="#FAD4E0"
+              stroke="#CE7A95"
+              strokeWidth="1.6"
+            />
+            <circle
+              cx="17"
+              cy="2"
+              r="19"
+              fill="#FAD4E0"
+              stroke="#CE7A95"
+              strokeWidth="1.6"
+            />
+            <circle
+              cx="0"
+              cy="-15"
+              r="20"
+              fill="#FCE0E9"
+              stroke="#CE7A95"
+              strokeWidth="1.6"
+            />
+            <circle
+              cx="-11"
+              cy="-10"
+              r="16"
+              fill="#F7BDD0"
+              stroke="#CE7A95"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx="11"
+              cy="-10"
+              r="16"
+              fill="#F7BDD0"
+              stroke="#CE7A95"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx="0"
+              cy="9"
+              r="19"
+              fill="#F5ABC2"
+              stroke="#CE7A95"
+              strokeWidth="1.6"
+            />
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <circle
+              cx="0"
+              cy="-1"
+              r="14"
+              fill="#FDE8EF"
+              stroke="#CE7A95"
+              strokeWidth="1.5"
+            />
+            <circle cx="0" cy="-1" r="6.5" fill="#F8D97E" />
+            <path
+              d="M -9 2 Q 0 -7 9 2"
+              fill="none"
+              stroke="#F49CB8"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </g>
+        </g>
+      );
+
+    case "lavender": {
+      const tiers = [-42, -31, -20, -9, 2, 13];
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {tiers.map((y, idx) => (
+              <g key={y}>
+                <ellipse
+                  cx="-7"
+                  cy={y}
+                  rx="6.2"
+                  ry="4.2"
+                  transform={`rotate(-28 -7 ${y})`}
+                  fill={idx % 2 === 0 ? "#C3AEE8" : "#B095DF"}
+                  stroke="#8568BA"
+                  strokeWidth="1.3"
+                />
+                <ellipse
+                  cx="7"
+                  cy={y + 2}
+                  rx="6.2"
+                  ry="4.2"
+                  transform={`rotate(28 7 ${y + 2})`}
+                  fill={idx % 2 === 0 ? "#B095DF" : "#D2C2F0"}
+                  stroke="#8568BA"
+                  strokeWidth="1.3"
+                />
+              </g>
+            ))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            {tiers.map((y) => (
+              <ellipse
+                key={y}
+                cx="0"
+                cy={y - 3}
+                rx="4.8"
+                ry="5.8"
+                fill="#D6C7F2"
+                stroke="#8568BA"
+                strokeWidth="1.3"
+              />
+            ))}
+          </g>
+        </g>
+      );
+    }
+
+    case "babys_breath": {
+      const outerBuds = [
+        { x: -24, y: -18, r: 6.5 },
+        { x: -12, y: -32, r: 6 },
+        { x: 4, y: -36, r: 6.8 },
+        { x: 20, y: -26, r: 6.2 },
+        { x: 26, y: -10, r: 5.8 },
+        { x: -18, y: 0, r: 5.8 },
+      ];
+      const innerBuds = [
+        { x: 0, y: -16, r: 6.5 },
+        { x: 14, y: -6, r: 6 },
+        { x: -4, y: 4, r: 5.5 },
+      ];
+      const renderBud = (b: { x: number; y: number; r: number }, key: string) => (
+        <g key={key} transform={`translate(${b.x}, ${b.y})`}>
+          <circle
+            cx="-2.5"
+            cy="-2"
+            r={b.r * 0.62}
+            fill="#FFFFFF"
+            stroke="#D8D2C9"
+            strokeWidth="1.1"
+          />
+          <circle
+            cx="2.5"
+            cy="-2"
+            r={b.r * 0.62}
+            fill="#FFFFFF"
+            stroke="#D8D2C9"
+            strokeWidth="1.1"
+          />
+          <circle
+            cx="0"
+            cy="2.2"
+            r={b.r * 0.62}
+            fill="#FFFDF8"
+            stroke="#D8D2C9"
+            strokeWidth="1.1"
+          />
+          <circle cx="0" cy="-0.5" r="1.8" fill="#F6DF8E" />
+        </g>
+      );
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {outerBuds.map((b, i) => renderBud(b, `ob-${i}`))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            {innerBuds.map((b, i) => renderBud(b, `ib-${i}`))}
+          </g>
+        </g>
+      );
+    }
+
+    case "hydrangea": {
+      const outerFlorets = [
+        { x: -16, y: -14, fill: "#C5D8F6" },
+        { x: 4, y: -18, fill: "#D4E3FA" },
+        { x: 18, y: -6, fill: "#B8CEF2" },
+        { x: -18, y: 6, fill: "#D4E3FA" },
+        { x: 2, y: 12, fill: "#C5D8F6" },
+      ];
+      const renderFloret = (f: { x: number; y: number; fill: string }, key: string) => (
+        <g key={key} transform={`translate(${f.x}, ${f.y})`}>
+          <circle
+            cx="-7"
+            cy="0"
+            r="7.5"
+            fill={f.fill}
+            stroke="#7E9FD4"
+            strokeWidth="1.3"
+          />
+          <circle
+            cx="7"
+            cy="0"
+            r="7.5"
+            fill={f.fill}
+            stroke="#7E9FD4"
+            strokeWidth="1.3"
+          />
+          <circle
+            cx="0"
+            cy="-7"
+            r="7.5"
+            fill={f.fill}
+            stroke="#7E9FD4"
+            strokeWidth="1.3"
+          />
+          <circle
+            cx="0"
+            cy="7"
+            r="7.5"
+            fill={f.fill}
+            stroke="#7E9FD4"
+            strokeWidth="1.3"
+          />
+          <circle cx="0" cy="0" r="2.4" fill="#FFF6C9" />
+        </g>
+      );
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {outerFlorets.map((f, idx) => renderFloret(f, `hf-${idx}`))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            {renderFloret({ x: 0, y: -2, fill: "#E1ECFC" }, "hf-center")}
+          </g>
+        </g>
+      );
+    }
+
+    case "ranunculus":
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            <circle
+              cx="0"
+              cy="0"
+              r="26"
+              fill="#FCD8C2"
+              stroke="#D18862"
+              strokeWidth="1.7"
+            />
+            <circle
+              cx="-2"
+              cy="-1"
+              r="21"
+              fill="#FAC5A6"
+              stroke="#D18862"
+              strokeWidth="1.6"
+            />
+            <circle
+              cx="2"
+              cy="1"
+              r="16"
+              fill="#F8B38E"
+              stroke="#C77952"
+              strokeWidth="1.6"
+            />
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <circle
+              cx="0"
+              cy="0"
+              r="11"
+              fill="#FAD0B6"
+              stroke="#C77952"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx="0"
+              cy="0"
+              r="5.5"
+              fill="#DCE8B8"
+              stroke="#8FA868"
+              strokeWidth="1.4"
+            />
+          </g>
+        </g>
+      );
+
+    case "chamomile": {
+      const heads = [
+        { x: -16, y: -16, s: 0.85 },
+        { x: 15, y: -20, s: 0.9 },
+        { x: 2, y: 4, s: 1.0 },
+      ];
+      const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            {heads.map((h, idx) => (
+              <g key={`p-${idx}`} transform={`translate(${h.x}, ${h.y}) scale(${h.s})`}>
+                {angles.map((deg) => (
+                  <ellipse
+                    key={deg}
+                    cx="0"
+                    cy="-12"
+                    rx="4.4"
+                    ry="8.5"
+                    transform={`rotate(${deg})`}
+                    fill="#FFFDF8"
+                    stroke="#D8CFC4"
+                    strokeWidth="1.2"
+                  />
+                ))}
+              </g>
+            ))}
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            {heads.map((h, idx) => (
+              <g key={`c-${idx}`} transform={`translate(${h.x}, ${h.y}) scale(${h.s})`}>
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="7.5"
+                  fill="#F7D35C"
+                  stroke="#C99D2B"
+                  strokeWidth="1.4"
+                />
+              </g>
+            ))}
+          </g>
+        </g>
+      );
+    }
+
+    case "orchid":
+      return (
+        <g>
+          <g className={petalsClassName} style={petalsStyle}>
+            <ellipse
+              cx="0"
+              cy="-20"
+              rx="13"
+              ry="18"
+              fill="#ECD4F4"
+              stroke="#A876BA"
+              strokeWidth="1.6"
+            />
+            <ellipse
+              cx="-13"
+              cy="12"
+              rx="10"
+              ry="16"
+              transform="rotate(28 -13 12)"
+              fill="#E5C6F0"
+              stroke="#A876BA"
+              strokeWidth="1.6"
+            />
+            <ellipse
+              cx="13"
+              cy="12"
+              rx="10"
+              ry="16"
+              transform="rotate(-28 13 12)"
+              fill="#E5C6F0"
+              stroke="#A876BA"
+              strokeWidth="1.6"
+            />
+            <ellipse
+              cx="-20"
+              cy="-4"
+              rx="18"
+              ry="15"
+              transform="rotate(-12 -20 -4)"
+              fill="#F4E3FA"
+              stroke="#A876BA"
+              strokeWidth="1.7"
+            />
+            <ellipse
+              cx="20"
+              cy="-4"
+              rx="18"
+              ry="15"
+              transform="rotate(12 20 -4)"
+              fill="#F4E3FA"
+              stroke="#A876BA"
+              strokeWidth="1.7"
+            />
+          </g>
+          <g className={centerClassName} style={centerStyle}>
+            <path
+              d="M 0 -4 C -11 -2, -12 14, 0 18 C 12 14, 11 -2, 0 -4 Z"
+              fill="#D474A8"
+              stroke="#9B4675"
+              strokeWidth="1.6"
+            />
+            <circle cx="0" cy="2" r="4.2" fill="#FBE38E" />
+          </g>
+        </g>
+      );
+
+    default:
+      return null;
+  }
+}
+
+/**
+ * Combined single-element illustration (stem + flower head) used by palette
+ * thumbnails and static decorative previews.
+ */
+export function BouquetElementGraphic({
+  type,
+}: {
+  type: BouquetElementType;
+}): React.ReactElement {
+  return (
+    <g>
+      <BouquetStemGraphic type={type} />
+      <BouquetFlowerHeadGraphic type={type} />
+    </g>
+  );
+}
+
 /**
  * SVG pattern definitions used by wrapping paper styles.
  */
@@ -1204,13 +1379,17 @@ export function WrappingPaperFront({
 }
 
 /**
- * Decorative bow tied at the bouquet waist (x=300, y=492).
+ * Bow geometry centered at local origin (0, 0) so animations can scale from the knot.
  */
-export function BouquetRibbonBow({ ribbon }: { ribbon: RibbonType }): React.ReactElement {
+export function BouquetRibbonBowShapes({
+  ribbon,
+}: {
+  ribbon: RibbonType;
+}): React.ReactElement {
   const meta = getRibbonMeta(ribbon);
 
   return (
-    <g transform="translate(300, 492)">
+    <g>
       {/* Trailing ribbon tails */}
       <path
         d="M -8 6 Q -32 54 -48 94 L -24 88 L -14 104 Q -4 58 0 10 Z"
@@ -1279,6 +1458,17 @@ export function BouquetRibbonBow({ ribbon }: { ribbon: RibbonType }): React.Reac
         stroke={meta.stroke}
         strokeWidth="2"
       />
+    </g>
+  );
+}
+
+/**
+ * Decorative bow tied at the bouquet waist (x=300, y=492).
+ */
+export function BouquetRibbonBow({ ribbon }: { ribbon: RibbonType }): React.ReactElement {
+  return (
+    <g transform="translate(300, 492)">
+      <BouquetRibbonBowShapes ribbon={ribbon} />
     </g>
   );
 }

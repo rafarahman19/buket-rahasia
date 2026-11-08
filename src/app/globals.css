@@ -27,6 +27,105 @@
   }
 }
 
+/* GPU-friendly SVG reveal keyframes (transform + opacity only) */
+@keyframes bouquet-stem-grow {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  28% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes bouquet-petals-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(var(--petal-start-rot, -20deg));
+  }
+  68% {
+    opacity: 1;
+    transform: scale(1.1) rotate(var(--petal-overshoot-rot, 4deg));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes bouquet-center-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.18) rotate(16deg);
+  }
+  66% {
+    opacity: 1;
+    transform: scale(1.16) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes bouquet-particle-drift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.35) rotate(0deg);
+  }
+  22% {
+    opacity: 0.9;
+  }
+  74% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-x, 0px), var(--drift-y, -96px), 0) scale(1)
+      rotate(var(--drift-rot, 42deg));
+  }
+}
+
+.bouquet-reveal-stem {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-name: bouquet-stem-grow;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: backwards;
+  will-change: transform, opacity;
+}
+
+.bouquet-reveal-petals {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: bouquet-petals-bloom;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: backwards;
+  will-change: transform, opacity;
+}
+
+.bouquet-reveal-center {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: bouquet-center-pop;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: backwards;
+  will-change: transform, opacity;
+}
+
+.bouquet-reveal-particle {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: bouquet-particle-drift;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.35, 1);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
