@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+.e2e-outbox
+package-lock.json
